@@ -1,0 +1,6 @@
+export enum ContractStatus {
+  PENDING = 'PENDING',
+  INPROGRESS = 'IN-PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+}
