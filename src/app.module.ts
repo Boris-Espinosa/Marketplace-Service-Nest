@@ -13,6 +13,8 @@ import { Proposal } from './proposals/entities/proposal.entity';
 import { Contract } from './contracts/entities/contract.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
+import { JwtModule } from '@nestjs/jwt';
+import 'dotenv/config';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import KeyvRedis from '@keyv/redis';
     ContractsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
+
       database: 'marketplacedb',
       username: 'root',
       password: process.env.DB_PASSWORD,
