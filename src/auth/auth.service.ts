@@ -3,13 +3,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import 'dotenv/config';
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,6 +39,23 @@ export class AuthService {
       role: user.role,
     };
     return {
+      userId: payload.id,
+      token: await this.jwtService.signAsync(payload),
+      refreshToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+        secret: process.env.REFRESH_JWT_PASSWORD,
+      }),
+    };
+  }
+
+  async refresh(user: any) {
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    return {
+      userId: payload.id,
       token: await this.jwtService.signAsync(payload),
     };
   }

@@ -4,12 +4,15 @@ import { Injectable } from '@nestjs/common';
 import 'dotenv/config';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class RefreshJwtStrategy extends PassportStrategy(
+  Strategy,
+  'refresh-jwt',
+) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_PASSWORD ?? '',
+      secretOrKey: process.env.REFRESH_JWT_PASSWORD ?? '',
     });
   }
 

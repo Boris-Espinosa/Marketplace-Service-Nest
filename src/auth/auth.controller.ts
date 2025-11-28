@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from 'src/common/guards/local-auth.guard';
 import { type Request } from 'express';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RefreshAuthGuard } from 'src/common/guards/refresh-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +13,12 @@ export class AuthController {
   @Post('/login')
   login(@Req() { user }) {
     return this.authService.login(user);
+  }
+
+  @UseGuards(RefreshAuthGuard)
+  @Post('/refresh')
+  refresh(@Req() { user }) {
+    return this.authService.refresh(user);
   }
 
   @UseGuards(LocalAuthGuard)

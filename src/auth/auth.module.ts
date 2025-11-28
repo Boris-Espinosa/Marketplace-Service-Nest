@@ -9,6 +9,7 @@ import { User } from 'src/users/entities/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import 'dotenv/config';
+import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 
 @Module({
   imports: [
@@ -19,11 +20,11 @@ import 'dotenv/config';
       global: true,
       secret: process.env.JWT_PASSWORD,
       signOptions: {
-        expiresIn: '12h',
+        expiresIn: '60s',
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, RefreshJwtStrategy],
 })
 export class AuthModule {}
