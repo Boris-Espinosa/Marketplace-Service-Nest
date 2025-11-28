@@ -1,10 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/common/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +32,14 @@ export class UsersService {
   }
 
   async findAll() {
-    return `This action returns all users`;
+    return await this.usersRepository.find({
+      relations: {
+        proposals: true,
+        services: true,
+        contractsAsClient: true,
+        contractsAsFreelancer: true,
+      },
+    });
   }
 
   async findOne(email: string) {
@@ -35,11 +48,71 @@ export class UsersService {
     return userFound;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto, clientUser: any) {
+    if (clientUser.role !== Role.ADMIN && clientUser.id !== id)
+      throw new UnauthorizedException();
+
+    const userFound = await this.usersRepository.findOneBy({ id });
+
+    if (!userFound)
+      throw new HttpException('User does not exists', HttpStatus.BAD_REQUEST);
+
+    const hasValidFields = Object.entries(updateUserDto).some(
+      ([key, value]) =>
+        key !== null &&
+        value !== null &&
+        key !== undefined &&
+        value !== undefined &&
+        key !== '' &&
+        value !== '',
+    );
+
+    if (!hasValidFields)
+      throw new HttpException(
+        'Please enter at least 1 valid field',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const updates = { ...updateUserDto };
+
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    try {
+      await this.usersRepository.update({ id }, updates);
+      const userUpdated = await this.usersRepository.findOneBy({ id });
+      return { message: 'User updated succesfully', user: userUpdated };
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY')
+        throw new HttpException(
+          'The email is already in use',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number, clientUser: any) {
+    if (clientUser.role !== Role.ADMIN && clientUser.id !== id)
+      throw new UnauthorizedException();
+
+    const userFound = await this.usersRepository.findOneBy({ id });
+
+    if (!userFound)
+      throw new HttpException('User does not exists', HttpStatus.BAD_REQUEST);
+
+    const affected = await this.usersRepository.delete({ id });
+    if (!affected.affected) {
+      throw new HttpException(
+        'Something went wrong trying to delete',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return { id, message: 'user deleted successfully' };
   }
 }

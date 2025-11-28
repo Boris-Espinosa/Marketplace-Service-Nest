@@ -20,7 +20,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
       global: true,
       secret: process.env.JWT_PASSWORD,
       signOptions: {
-        expiresIn: '60s',
+        expiresIn: '1h',
       },
     }),
   ],
