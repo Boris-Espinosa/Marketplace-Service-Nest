@@ -17,7 +17,16 @@ export class RoleGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    // Si no hay roles requeridos, permitir acceso
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
+
     const user = context.switchToHttp().getRequest().user;
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
     const hasRequiredRoles = requiredRoles.some((role) => user.role === role);
     if (!hasRequiredRoles)
       throw new UnauthorizedException(

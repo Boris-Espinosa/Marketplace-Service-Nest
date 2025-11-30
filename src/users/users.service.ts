@@ -109,7 +109,7 @@ export class UsersService {
     const affected = await this.usersRepository.delete({ id });
     if (!affected.affected) {
       throw new HttpException(
-        'Something went wrong trying to delete',
+        'Something went wrong trying to delete the user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
