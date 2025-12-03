@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { ContractsService } from './contracts.service';
 import { CreateContractDto } from './dto/create-contract.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RoleGuard } from 'src/common/guards/role.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/common/enums/roles.enum';
-import { ContractStatus } from 'src/common/enums/contract-status.enum';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RoleGuard } from '../common/guards/role.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/roles.enum';
+import { ContractStatus } from '../common/enums/contract-status.enum';
 
 @Controller('contracts')
 export class ContractsController {

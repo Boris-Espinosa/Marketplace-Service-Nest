@@ -1,5 +1,5 @@
-import { Proposal } from 'src/proposals/entities/proposal.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Proposal } from '../../proposals/entities/proposal.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,

@@ -13,8 +13,9 @@ import { Proposal } from './proposals/entities/proposal.entity';
 import { Contract } from './contracts/entities/contract.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
-import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import 'dotenv/config';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -39,10 +40,37 @@ import 'dotenv/config';
       isGlobal: true,
       useFactory: async () => ({
         store: new KeyvRedis('redis://localhost:6379'),
+        ttl: 60000,
       }),
+    }),
+
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'short',
+          ttl: 1000,
+          limit: 3,
+        },
+        {
+          name: 'medium',
+          ttl: 10000,
+          limit: 20,
+        },
+        {
+          name: 'long',
+          ttl: 60000,
+          limit: 100,
+        },
+      ],
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

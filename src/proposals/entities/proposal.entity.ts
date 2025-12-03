@@ -1,6 +1,6 @@
-import { ProposalStatus } from 'src/common/enums/proposal-status.enum';
-import { Service } from 'src/services/entities/service.entity';
-import { User } from 'src/users/entities/user.entity';
+import { ProposalStatus } from '../../common/enums/proposal-status.enum';
+import { Service } from '../../services/entities/service.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -31,7 +31,7 @@ export class Proposal {
   amount: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: ProposalStatus,
     default: ProposalStatus.PENDING,
   })

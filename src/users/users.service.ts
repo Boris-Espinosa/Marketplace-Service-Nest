@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/common/enums/roles.enum';
+import { Role } from '../common/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -82,6 +83,7 @@ export class UsersService {
     try {
       await this.usersRepository.update({ id }, updates);
       const userUpdated = await this.usersRepository.findOneBy({ id });
+      if (!userUpdated) throw new NotFoundException('User not found');
       return { message: 'User updated succesfully', user: userUpdated };
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY')

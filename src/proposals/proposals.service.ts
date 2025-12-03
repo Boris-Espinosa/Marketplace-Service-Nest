@@ -12,10 +12,10 @@ import { UpdateProposalDto } from './dto/update-proposal.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Proposal } from './entities/proposal.entity';
 import { Repository } from 'typeorm';
-import { ProposalStatus } from 'src/common/enums/proposal-status.enum';
-import { Service } from 'src/services/entities/service.entity';
-import { ClientUser } from 'src/common/interfaces/client-user.interface';
-import { Role } from 'src/common/enums/roles.enum';
+import { ProposalStatus } from '../common/enums/proposal-status.enum';
+import { Service } from '../services/entities/service.entity';
+import { ClientUser } from '../common/interfaces/client-user.interface';
+import { Role } from '../common/enums/roles.enum';
 
 @Injectable()
 export class ProposalsService {

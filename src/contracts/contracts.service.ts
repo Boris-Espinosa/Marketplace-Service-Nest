@@ -9,11 +9,11 @@ import { CreateContractDto } from './dto/create-contract.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contract } from './entities/contract.entity';
 import { Repository } from 'typeorm';
-import { Proposal } from 'src/proposals/entities/proposal.entity';
-import { ProposalStatus } from 'src/common/enums/proposal-status.enum';
-import { ContractStatus } from 'src/common/enums/contract-status.enum';
-import { ClientUser } from 'src/common/interfaces/client-user.interface';
-import { Role } from 'src/common/enums/roles.enum';
+import { Proposal } from '../proposals/entities/proposal.entity';
+import { ProposalStatus } from '../common/enums/proposal-status.enum';
+import { ContractStatus } from '../common/enums/contract-status.enum';
+import { ClientUser } from '../common/interfaces/client-user.interface';
+import { Role } from '../common/enums/roles.enum';
 
 @Injectable()
 export class ContractsService {

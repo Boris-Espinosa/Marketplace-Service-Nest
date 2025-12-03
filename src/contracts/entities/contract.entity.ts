@@ -1,4 +1,4 @@
-import { ContractStatus } from 'src/common/enums/contract-status.enum';
+import { ContractStatus } from '../../common/enums/contract-status.enum';
 import {
   Column,
   CreateDateColumn,
@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Proposal } from '../../proposals/entities/proposal.entity';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Contract {
@@ -27,7 +27,7 @@ export class Contract {
   clientId: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: ContractStatus,
     default: ContractStatus.PENDING,
   })

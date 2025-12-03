@@ -1,7 +1,7 @@
-import { Role } from 'src/common/enums/roles.enum';
-import { Contract } from 'src/contracts/entities/contract.entity';
-import { Proposal } from 'src/proposals/entities/proposal.entity';
-import { Service } from 'src/services/entities/service.entity';
+import { Role } from '../../common/enums/roles.enum';
+import { Contract } from '../../contracts/entities/contract.entity';
+import { Proposal } from '../../proposals/entities/proposal.entity';
+import { Service } from '../../services/entities/service.entity';
 import {
   Column,
   CreateDateColumn,
@@ -22,7 +22,7 @@ export class User {
   @Column({ select: false })
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.CLIENT })
+  @Column({ type: 'simple-enum', enum: Role, default: Role.CLIENT })
   role: Role;
 
   @CreateDateColumn()

@@ -12,8 +12,8 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Service } from './entities/service.entity';
 import { Repository } from 'typeorm';
-import { Role } from 'src/common/enums/roles.enum';
-import { ClientUser } from 'src/common/interfaces/client-user.interface';
+import { Role } from '../common/enums/roles.enum';
+import { ClientUser } from '../common/interfaces/client-user.interface';
 
 @Injectable()
 export class ServicesService {

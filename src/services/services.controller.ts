@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -16,6 +18,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/roles.enum';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('services')
 export class ServicesController {
@@ -26,7 +29,8 @@ export class ServicesController {
   create(@Body() createServiceDto: CreateServiceDto, @Req() { user }) {
     return this.servicesService.create(createServiceDto, user.id);
   }
-
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('all_services')
   @Roles(Role.ADMIN)
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
@@ -41,6 +45,7 @@ export class ServicesController {
     return this.servicesService.findByClient(user.id);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @Req() { user }) {
@@ -51,7 +56,8 @@ export class ServicesController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
+    @Body(new ValidationPipe({ whitelist: true, skipNullProperties: true }))
+    updateServiceDto: UpdateServiceDto,
     @Req() { user },
   ) {
     return this.servicesService.update(+id, updateServiceDto, user);

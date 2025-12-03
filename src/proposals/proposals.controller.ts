@@ -8,15 +8,18 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ProposalsService } from './proposals.service';
 import { CreateProposalDto } from './dto/create-proposal.dto';
 import { UpdateProposalDto } from './dto/update-proposal.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RoleGuard } from 'src/common/guards/role.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/common/enums/roles.enum';
-import { ProposalStatus } from 'src/common/enums/proposal-status.enum';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RoleGuard } from '../common/guards/role.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/roles.enum';
+import { ProposalStatus } from '../common/enums/proposal-status.enum';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('proposals')
 export class ProposalsController {
@@ -46,6 +49,7 @@ export class ProposalsController {
     return this.proposalsService.findByFreelancer(user.id);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get('service/:serviceId')
   findByService(@Param('serviceId') serviceId: string, @Req() { user }) {
@@ -64,7 +68,8 @@ export class ProposalsController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateProposalDto: UpdateProposalDto,
+    @Body(new ValidationPipe({ whitelist: true, skipNullProperties: true }))
+    updateProposalDto: UpdateProposalDto,
     @Req() { user },
   ) {
     return this.proposalsService.update(+id, updateProposalDto, user);
