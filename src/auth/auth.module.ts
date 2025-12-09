@@ -18,7 +18,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_PASSWORD,
+      secret: process.env.JWT_SECRET,
       signOptions: {
         expiresIn: '1h',
       },

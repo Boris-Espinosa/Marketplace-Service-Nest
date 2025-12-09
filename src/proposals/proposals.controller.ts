@@ -66,19 +66,6 @@ export class ProposalsController {
     return this.proposalsService.findOne(+id, user);
   }
 
-  @Roles(Role.FREELANCER, Role.ADMIN)
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body(new ValidationPipe({ whitelist: true, skipNullProperties: true }))
-    updateProposalDto: UpdateProposalDto,
-    @Req() { user },
-  ) {
-    return this.proposalsService.update(+id, updateProposalDto, user);
-  }
-
   @Roles(Role.CLIENT)
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
@@ -101,6 +88,19 @@ export class ProposalsController {
       ProposalStatus.REJECTED,
       user,
     );
+  }
+
+  @Roles(Role.FREELANCER, Role.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body(new ValidationPipe({ whitelist: true, skipNullProperties: true }))
+    updateProposalDto: UpdateProposalDto,
+    @Req() { user },
+  ) {
+    return this.proposalsService.update(+id, updateProposalDto, user);
   }
 
   @Roles(Role.FREELANCER, Role.ADMIN)

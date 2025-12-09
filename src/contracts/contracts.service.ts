@@ -112,7 +112,7 @@ export class ContractsService {
     });
     if (!contract) throw new NotFoundException('Contract not found');
 
-    if (contract.status == ContractStatus.CANCELED)
+    if (contract.status === ContractStatus.CANCELED)
       throw new HttpException(
         'Cannot update a contract that is canceled',
         HttpStatus.BAD_REQUEST,

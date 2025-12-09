@@ -36,17 +36,12 @@ export class ServicesService {
     });
   }
 
-  async findOne(id: number, clientUser: ClientUser) {
+  async findOne(id: number) {
     const service = await this.servicesRepository.findOne({
       where: { id },
       relations: ['client', 'proposals'],
     });
     if (!service) throw new NotFoundException('Service not found');
-
-    if (clientUser.role !== Role.ADMIN && clientUser.id !== service.clientId)
-      throw new UnauthorizedException(
-        'You are not authorized to get this service',
-      );
 
     return service;
   }
@@ -88,7 +83,7 @@ export class ServicesService {
     const updates = { ...updateServiceDto };
 
     await this.servicesRepository.update({ id }, updates);
-    return await this.findOne(id, clientUser);
+    return await this.findOne(id);
   }
 
   async remove(id: number, clientUser: ClientUser) {

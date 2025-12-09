@@ -50,10 +50,9 @@ export class ServicesController {
   }
 
   @UseInterceptors(CacheInterceptor)
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() { user }) {
-    return this.servicesService.findOne(+id, user);
+  findOne(@Param('id') id: string) {
+    return this.servicesService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)
