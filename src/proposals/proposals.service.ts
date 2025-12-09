@@ -16,6 +16,7 @@ import { ProposalStatus } from '../common/enums/proposal-status.enum';
 import { Service } from '../services/entities/service.entity';
 import { ClientUser } from '../common/interfaces/client-user.interface';
 import { Role } from '../common/enums/roles.enum';
+import { ContractsService } from 'src/contracts/contracts.service';
 
 @Injectable()
 export class ProposalsService {
@@ -24,6 +25,7 @@ export class ProposalsService {
     private proposalsRepository: Repository<Proposal>,
     @InjectRepository(Service)
     private servicesRepository: Repository<Service>,
+    private contractsService: ContractsService,
   ) {}
 
   async create(createProposalDto: CreateProposalDto, freelancerId: number) {
@@ -66,10 +68,21 @@ export class ProposalsService {
     if (!proposal) throw new NotFoundException('Proposal not found');
 
     if (clientUser.role === Role.CLIENT) {
-      const service = await this.servicesRepository.findOne({
-        where: { clientId: clientUser.id, proposals: proposal },
+      const service = await this.servicesRepository.find({
+        where: { clientId: clientUser.id },
+        relations: {
+          proposals: true,
+        },
       });
-      if (!service)
+      if (!service) {
+        throw new NotFoundException(
+          'The service for this proposal was not found',
+        );
+      }
+      const isValid = service.some((service) =>
+        service.proposals.some((prop) => prop.id === proposal.id),
+      );
+      if (!isValid)
         throw new UnauthorizedException(
           'You are not authorized to get this proposal',
         );
@@ -103,16 +116,26 @@ export class ProposalsService {
       (proposal) => proposal.freelancerId === clientUser.id,
     );
     if (clientUser.role === Role.CLIENT) {
-      const service = await this.servicesRepository.findOne({
-        where: {
-          id: serviceId,
-          clientId: clientUser.id,
-          proposals: proposals,
+      const services = await this.servicesRepository.find({
+        where: { clientId: clientUser.id },
+        relations: {
+          proposals: true,
         },
       });
-      if (!service)
+      if (!services) {
+        throw new NotFoundException(
+          'The service for this proposal was not found',
+        );
+      }
+      let isValid = false;
+      for (let i = 0; i < proposals.length; i++) {
+        isValid = services.some(
+          (service) => service.id === proposals[i].serviceId,
+        );
+      }
+      if (!isValid)
         throw new UnauthorizedException(
-          'You are not authorized to get this proposals',
+          'You are not authorized to get this proposal',
         );
     } else if (clientUser.role !== Role.ADMIN && !isFreelancer)
       throw new UnauthorizedException(
@@ -187,8 +210,32 @@ export class ProposalsService {
       );
     }
 
+    if (proposal.status !== ProposalStatus.PENDING) {
+      throw new HttpException(
+        'Cannot update a proposal that is not pending',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     await this.proposalsRepository.update(id, { status });
-    return await this.findOne(id, clientUser);
+    const proposalUpdated = await this.findOne(id, clientUser);
+    let contract;
+    if (
+      status === ProposalStatus.ACCEPTED &&
+      proposalUpdated.status === ProposalStatus.ACCEPTED
+    ) {
+      contract = await this.contractsService.create(
+        { proposalId: id },
+        clientUser.id,
+      );
+    }
+    return {
+      message:
+        contract !== undefined
+          ? `Proposal updated and contract created with ID ${contract.id}`
+          : 'Proposal updated',
+      proposal,
+    };
   }
 
   async remove(id: number, clientUser: ClientUser) {

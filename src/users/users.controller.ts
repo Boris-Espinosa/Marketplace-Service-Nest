@@ -23,7 +23,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(
+    @Body(new ValidationPipe({ whitelist: true })) createUserDto: CreateUserDto,
+  ) {
     return this.usersService.create(createUserDto);
   }
 

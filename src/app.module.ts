@@ -26,12 +26,11 @@ import { APP_GUARD } from '@nestjs/core';
     ContractsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-
-      database: 'marketplacedb',
-      username: 'root',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306', 10),
+      username: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD,
-      host: 'localhost',
-      port: 3306,
+      database: process.env.DB_NAME || 'marketplacedb',
       entities: [User, Service, Proposal, Contract],
       autoLoadEntities: true,
       synchronize: true,
@@ -39,7 +38,7 @@ import { APP_GUARD } from '@nestjs/core';
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => ({
-        store: new KeyvRedis('redis://localhost:6379'),
+        store: new KeyvRedis(process.env.REDIS_URL || 'redis://localhost:6379'),
         ttl: 60000,
       }),
     }),

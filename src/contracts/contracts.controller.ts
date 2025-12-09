@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ContractsService } from './contracts.service';
 import { CreateContractDto } from './dto/create-contract.dto';
@@ -25,7 +26,11 @@ export class ContractsController {
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createContractDto: CreateContractDto, @Req() { user }) {
+  create(
+    @Body(new ValidationPipe({ whitelist: true }))
+    createContractDto: CreateContractDto,
+    @Req() { user },
+  ) {
     return this.contractsService.create(createContractDto, user.id);
   }
 
@@ -65,7 +70,7 @@ export class ContractsController {
     return this.contractsService.updateStatus(
       +id,
       ContractStatus.INPROGRESS,
-      user.id,
+      user,
     );
   }
 
@@ -75,7 +80,7 @@ export class ContractsController {
     return this.contractsService.updateStatus(
       +id,
       ContractStatus.COMPLETED,
-      user.id,
+      user,
     );
   }
 
@@ -85,7 +90,7 @@ export class ContractsController {
     return this.contractsService.updateStatus(
       +id,
       ContractStatus.CANCELED,
-      user.id,
+      user,
     );
   }
 

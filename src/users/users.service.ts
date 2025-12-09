@@ -53,6 +53,9 @@ export class UsersService {
     if (clientUser.role !== Role.ADMIN && clientUser.id !== id)
       throw new UnauthorizedException();
 
+    if (updateUserDto.role !== undefined && clientUser.role !== Role.ADMIN)
+      throw new UnauthorizedException('Only administrators can update roles');
+
     const userFound = await this.usersRepository.findOneBy({ id });
 
     if (!userFound)

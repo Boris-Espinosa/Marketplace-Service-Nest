@@ -29,7 +29,11 @@ export class ProposalsController {
   @UseGuards(RoleGuard)
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createProposalDto: CreateProposalDto, @Req() { user }) {
+  create(
+    @Body(new ValidationPipe({ whitelist: true }))
+    createProposalDto: CreateProposalDto,
+    @Req() { user },
+  ) {
     return this.proposalsService.create(createProposalDto, user.id);
   }
 

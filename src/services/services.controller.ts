@@ -26,7 +26,11 @@ export class ServicesController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createServiceDto: CreateServiceDto, @Req() { user }) {
+  create(
+    @Body(new ValidationPipe({ whitelist: true }))
+    createServiceDto: CreateServiceDto,
+    @Req() { user },
+  ) {
     return this.servicesService.create(createServiceDto, user.id);
   }
   @UseInterceptors(CacheInterceptor)

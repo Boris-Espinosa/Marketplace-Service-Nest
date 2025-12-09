@@ -107,8 +107,16 @@ export class ContractsService {
     status: ContractStatus,
     clientUser: ClientUser,
   ) {
-    const contract = await this.contractsRepository.findOneBy({ id });
+    const contract = await this.contractsRepository.findOne({
+      where: { id },
+    });
     if (!contract) throw new NotFoundException('Contract not found');
+
+    if (contract.status == ContractStatus.CANCELED)
+      throw new HttpException(
+        'Cannot update a contract that is canceled',
+        HttpStatus.BAD_REQUEST,
+      );
 
     if (
       contract.clientId !== clientUser.id &&
@@ -119,6 +127,15 @@ export class ContractsService {
         HttpStatus.FORBIDDEN,
       );
     }
+
+    if (
+      contract.status !== ContractStatus.PENDING &&
+      status === ContractStatus.CANCELED
+    )
+      throw new HttpException(
+        'Cannot cancel a contract that is not pending',
+        HttpStatus.BAD_REQUEST,
+      );
 
     await this.contractsRepository.update(id, { status });
     return await this.findOne(id, clientUser);
