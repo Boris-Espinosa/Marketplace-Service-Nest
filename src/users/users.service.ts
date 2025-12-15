@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -26,8 +27,12 @@ export class UsersService {
     if (userFound)
       throw new HttpException('Email already in use', HttpStatus.BAD_REQUEST);
     const newUser = this.usersRepository.create(createUserDto);
-    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
-    newUser.password = passwordHash;
+    try {
+      const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+      newUser.password = passwordHash;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
     const { password, ...user } = await this.usersRepository.save(newUser);
     return user;
   }
@@ -80,7 +85,11 @@ export class UsersService {
     const updates = { ...updateUserDto };
 
     if (updates.password) {
-      updates.password = await bcrypt.hash(updates.password, 10);
+      try {
+        updates.password = await bcrypt.hash(updates.password, 10);
+      } catch (error) {
+        throw new InternalServerErrorException();
+      }
     }
 
     try {
