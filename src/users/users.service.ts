@@ -31,7 +31,8 @@ export class UsersService {
       const passwordHash = await bcrypt.hash(createUserDto.password, 10);
       newUser.password = passwordHash;
     } catch (error) {
-      throw new InternalServerErrorException();
+      console.error('Error hashing password:', error);
+      throw new InternalServerErrorException('Error creating user');
     }
     const { password, ...user } = await this.usersRepository.save(newUser);
     return user;
@@ -64,15 +65,12 @@ export class UsersService {
     const userFound = await this.usersRepository.findOneBy({ id });
 
     if (!userFound)
-      throw new HttpException('User does not exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
 
-    const hasValidFields = Object.entries(updateUserDto).some(
-      ([key, value]) =>
-        key !== null &&
+    const hasValidFields = Object.values(updateUserDto).some(
+      (value) =>
         value !== null &&
-        key !== undefined &&
         value !== undefined &&
-        key !== '' &&
         value !== '',
     );
 
@@ -88,7 +86,8 @@ export class UsersService {
       try {
         updates.password = await bcrypt.hash(updates.password, 10);
       } catch (error) {
-        throw new InternalServerErrorException();
+        console.error('Error hashing password:', error);
+        throw new InternalServerErrorException('Error updating password');
       }
     }
 
@@ -96,14 +95,17 @@ export class UsersService {
       await this.usersRepository.update({ id }, updates);
       const userUpdated = await this.usersRepository.findOneBy({ id });
       if (!userUpdated) throw new NotFoundException('User not found');
-      return { message: 'User updated succesfully', user: userUpdated };
+      return { message: 'User updated successfully', user: userUpdated };
     } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      
       if (error.code === 'ER_DUP_ENTRY')
         throw new HttpException(
           'The email is already in use',
           HttpStatus.BAD_REQUEST,
         );
 
+      console.error('Error updating user:', error);
       throw new HttpException(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -118,7 +120,7 @@ export class UsersService {
     const userFound = await this.usersRepository.findOneBy({ id });
 
     if (!userFound)
-      throw new HttpException('User does not exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException('User does not exist', HttpStatus.BAD_REQUEST);
 
     const affected = await this.usersRepository.delete({ id });
     if (!affected.affected) {

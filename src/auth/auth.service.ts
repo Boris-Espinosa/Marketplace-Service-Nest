@@ -30,7 +30,9 @@ export class AuthService {
           const isMatch = await bcrypt.compare(pass, userFound.password);
           if (!isMatch) throw new UnauthorizedException('Invalid credentials');
         } catch (error) {
-          throw new InternalServerErrorException();
+          if (error instanceof UnauthorizedException) throw error;
+          console.error('Error comparing passwords:', error);
+          throw new InternalServerErrorException('Error validating credentials');
         }
         const { password, ...user } = userFound;
         return user;
@@ -44,12 +46,18 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
+    
+    const refreshSecret = process.env.REFRESH_JWT_SECRET;
+    if (!refreshSecret) {
+      throw new InternalServerErrorException('REFRESH_JWT_SECRET not configured');
+    }
+    
     return {
       userId: payload.id,
       token: await this.jwtService.signAsync(payload),
       refreshToken: await this.jwtService.signAsync(payload, {
         expiresIn: '7d',
-        secret: process.env.REFRESH_JWT_SECRET,
+        secret: refreshSecret,
       }),
     };
   }
